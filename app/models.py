@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_serializer import SerializerMixin
+from sqlalchemy.orm import validates
 
 db = SQLAlchemy()
 
@@ -43,6 +44,13 @@ class Power(db.Model, SerializerMixin):
     # Create a relationship with the 'HeroPizza model, allowing access to related power data
     hero_powers = db.relationship('HeroPizza', backref='power')
 
+    #Validates the length of the description
+    @validates('description')
+    def validate_description(self, key, description):
+        if len(description) > 20:
+            raise ValueError('Name must be less than 20 characters.')
+        return description 
+
 
     def __repr__(self):
         return f'<Power {self.name}, Super power is {self.description}.'
@@ -63,6 +71,14 @@ class HeroPower(db.Model, SerializerMixin):
 
     hero_id = db.Column(db.Integer, db.ForeignKey('heroes.id'))
     power_id = db.Column(db.Integer, db.ForeignKey('powers.id'))
+
+    #Validates if strength is either strong, weak or average
+    @validates('strength')
+    def validate_strength(self, key, strength):
+        if strength =='Strong'or strength == 'Weak'or strength == 'Average':
+            return strength
+        else:
+            raise ValueError('Invalid strength')
 
 
     def __repr__(self):
